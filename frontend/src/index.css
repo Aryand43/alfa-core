@@ -1,0 +1,27 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  color: #1a202c;
+  background: #f7fafc;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: #3182ce;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+table {
+  font-size: 0.92rem;
+}
