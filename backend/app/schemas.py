@@ -70,13 +70,19 @@ class RunCreate(BaseModel):
     project_id: str
     command: str = ""
     git_commit: str = ""
+    started_at: Optional[datetime] = None
+    working_dir: str = ""
+
+
+class RunCreateResponse(BaseModel):
+    id: str
 
 
 class RunUpdate(BaseModel):
-    status: Optional[str] = None
-    metrics: Optional[str] = None
-    started_at: Optional[datetime] = None
     finished_at: Optional[datetime] = None
+    status: Optional[str] = None
+    exit_code: Optional[int] = None
+    metrics_json: Optional[dict] = None
 
 
 class RunRead(BaseModel):
@@ -84,9 +90,12 @@ class RunRead(BaseModel):
     status: str
     command: str
     git_commit: str
+    working_dir: str
+    exit_code: Optional[int]
     started_at: Optional[datetime]
     finished_at: Optional[datetime]
-    metrics: Optional[str]
+    metrics_json: Optional[str]
     project_id: str
     user_id: str
     created_at: datetime
+    updated_at: datetime

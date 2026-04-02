@@ -1,0 +1,10 @@
+pyproject.toml
+alfa/__init__.py
+alfa/cli.py
+alfa/client.py
+alfa_cli.egg-info/PKG-INFO
+alfa_cli.egg-info/SOURCES.txt
+alfa_cli.egg-info/dependency_links.txt
+alfa_cli.egg-info/entry_points.txt
+alfa_cli.egg-info/requires.txt
+alfa_cli.egg-info/top_level.txt

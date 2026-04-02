@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, SQLModel
 
 
 def _utcnow() -> datetime:
@@ -24,8 +24,6 @@ class User(SQLModel, table=True):
     display_name: str = ""
     created_at: datetime = Field(default_factory=_utcnow)
 
-    projects: list["Project"] = Relationship(back_populates="owner")
-
 
 # ── Lab ───────────────────────────────────────────────────────────────
 
@@ -34,8 +32,6 @@ class Lab(SQLModel, table=True):
     name: str = Field(index=True, unique=True)
     description: str = ""
     created_at: datetime = Field(default_factory=_utcnow)
-
-    projects: list["Project"] = Relationship(back_populates="lab")
 
 
 # ── Project ───────────────────────────────────────────────────────────
@@ -49,25 +45,21 @@ class Project(SQLModel, table=True):
     owner_id: str = Field(foreign_key="user.id")
     lab_id: Optional[str] = Field(default=None, foreign_key="lab.id")
 
-    owner: User = Relationship(back_populates="projects")
-    lab: Optional[Lab] = Relationship(back_populates="projects")
-    runs: list["Run"] = Relationship(back_populates="project")
-
 
 # ── Run ───────────────────────────────────────────────────────────────
 
 class Run(SQLModel, table=True):
     id: str = Field(default_factory=_new_id, primary_key=True)
-    status: str = Field(default="pending")  # pending | running | completed | failed
+    status: str = Field(default="pending")  # pending | running | success | failure
     command: str = ""
     git_commit: str = ""
+    working_dir: str = ""
+    exit_code: Optional[int] = None
     started_at: Optional[datetime] = None
     finished_at: Optional[datetime] = None
-    metrics: Optional[str] = None  # JSON blob
+    metrics_json: Optional[str] = None  # serialised JSON
     created_at: datetime = Field(default_factory=_utcnow)
+    updated_at: datetime = Field(default_factory=_utcnow)
 
     project_id: str = Field(foreign_key="project.id")
     user_id: str = Field(foreign_key="user.id")
-
-    project: Project = Relationship(back_populates="runs")
-    user: User = Relationship()

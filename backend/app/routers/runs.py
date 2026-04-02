@@ -1,17 +1,20 @@
 from __future__ import annotations
 
+import json
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 
 from ..auth import get_current_user
 from ..database import get_session
 from ..models import Project, Run, User
-from ..schemas import RunCreate, RunRead, RunUpdate
+from ..schemas import RunCreate, RunCreateResponse, RunRead, RunUpdate
 
 router = APIRouter(prefix="/runs", tags=["runs"])
 
 
-@router.post("/", response_model=RunRead, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=RunCreateResponse, status_code=status.HTTP_201_CREATED)
 def create_run(
     body: RunCreate,
     session: Session = Depends(get_session),
@@ -21,11 +24,19 @@ def create_run(
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    run = Run(**body.model_dump(), user_id=user.id)
+    run = Run(
+        project_id=body.project_id,
+        user_id=user.id,
+        command=body.command,
+        git_commit=body.git_commit,
+        working_dir=body.working_dir,
+        started_at=body.started_at,
+        status="running" if body.started_at else "pending",
+    )
     session.add(run)
     session.commit()
     session.refresh(run)
-    return run
+    return RunCreateResponse(id=run.id)
 
 
 @router.get("/{run_id}", response_model=RunRead)
@@ -51,9 +62,15 @@ def update_run(
     if not run:
         raise HTTPException(status_code=404, detail="Run not found")
 
-    for field, value in body.model_dump(exclude_unset=True).items():
+    patch = body.model_dump(exclude_unset=True)
+
+    if "metrics_json" in patch and patch["metrics_json"] is not None:
+        patch["metrics_json"] = json.dumps(patch["metrics_json"])
+
+    for field, value in patch.items():
         setattr(run, field, value)
 
+    run.updated_at = datetime.now(timezone.utc)
     session.add(run)
     session.commit()
     session.refresh(run)
