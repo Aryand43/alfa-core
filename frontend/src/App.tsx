@@ -7,6 +7,8 @@ import ProjectsPage from "./pages/ProjectsPage";
 import ProjectRunsPage from "./pages/ProjectRunsPage";
 import LabsPage from "./pages/LabsPage";
 import LabRunsPage from "./pages/LabRunsPage";
+import RunDetailPage from "./pages/RunDetailPage";
+import GettingStartedPage from "./pages/GettingStartedPage";
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { loggedIn } = useAuth();
@@ -22,6 +24,10 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route
+              path="/getting-started"
+              element={<PrivateRoute><GettingStartedPage /></PrivateRoute>}
+            />
+            <Route
               path="/projects"
               element={<PrivateRoute><ProjectsPage /></PrivateRoute>}
             />
@@ -36,6 +42,10 @@ export default function App() {
             <Route
               path="/labs/:labId"
               element={<PrivateRoute><LabRunsPage /></PrivateRoute>}
+            />
+            <Route
+              path="/runs/:runId"
+              element={<PrivateRoute><RunDetailPage /></PrivateRoute>}
             />
             <Route path="*" element={<Navigate to="/projects" replace />} />
           </Route>

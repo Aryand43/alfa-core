@@ -15,7 +15,7 @@ export default function RegisterPage() {
     setError("");
     try {
       await register(email, password, name);
-      navigate("/projects");
+      navigate("/getting-started");
     } catch (err: any) {
       setError(err.message ?? "Registration failed");
     }

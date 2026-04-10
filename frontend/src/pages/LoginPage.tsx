@@ -14,7 +14,7 @@ export default function LoginPage() {
     setError("");
     try {
       await login(email, password);
-      navigate("/projects");
+      navigate("/getting-started");
     } catch (err: any) {
       setError(err.message ?? "Login failed");
     }

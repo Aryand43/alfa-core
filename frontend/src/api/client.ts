@@ -92,12 +92,30 @@ export interface Run {
   status: string;
   command: string;
   git_commit: string;
+  working_dir: string;
+  exit_code: number | null;
   started_at: string | null;
   finished_at: string | null;
-  metrics: string | null;
+  metrics_json: string | null;
   project_id: string;
   user_id: string;
   created_at: string;
+  updated_at: string;
+}
+
+export interface RunCreatePayload {
+  project_id: string;
+  command?: string;
+  git_commit?: string;
+  started_at?: string;
+  working_dir?: string;
+}
+
+export interface RunUpdatePayload {
+  finished_at?: string;
+  status?: string;
+  exit_code?: number;
+  metrics_json?: Record<string, unknown>;
 }
 
 export function listProjectRuns(projectId: string) {
@@ -106,4 +124,22 @@ export function listProjectRuns(projectId: string) {
 
 export function listLabRuns(labId: string) {
   return request<Run[]>(`/labs/${labId}/runs`);
+}
+
+export function getRun(runId: string) {
+  return request<Run>(`/runs/${runId}`);
+}
+
+export function createRun(payload: RunCreatePayload) {
+  return request<{ id: string }>("/runs/", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function updateRun(runId: string, payload: RunUpdatePayload) {
+  return request<Run>(`/runs/${runId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
 }
