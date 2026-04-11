@@ -15,16 +15,20 @@ export default function LabRunsPage() {
 
   return (
     <>
-      <Link to="/labs" style={{ fontSize: "0.85rem", color: "#3182ce" }}>&larr; Back to labs</Link>
-      <h1 style={{ marginTop: "0.5rem" }}>Lab Runs</h1>
+      <Link to="/labs" className="text-xs text-sky-400 hover:text-sky-300">
+        ← Back to labs
+      </Link>
+      <h1 className="text-2xl font-bold tracking-tight text-white mt-2 mb-4">Lab Runs</h1>
 
-      {loading ? (
-        <p>Loading…</p>
-      ) : runs.length === 0 ? (
-        <p style={{ color: "#718096" }}>No runs in this lab yet.</p>
-      ) : (
-        <RunsTable runs={runs} />
-      )}
+      <div className="rounded-xl border border-slate-800 bg-black/60 p-5">
+        {loading ? (
+          <p className="text-sm text-slate-500">Loading…</p>
+        ) : runs.length === 0 ? (
+          <p className="text-sm text-slate-500">No runs in this lab yet.</p>
+        ) : (
+          <RunsTable runs={runs} />
+        )}
+      </div>
     </>
   );
 }

@@ -1,47 +1,33 @@
 import { Link, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Button from "./ui/Button";
 
 export default function Layout() {
   const { loggedIn, logout } = useAuth();
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0.75rem 1.5rem",
-          borderBottom: "1px solid #e2e8f0",
-          background: "#fff",
-        }}
-      >
-        <Link to="/" style={{ fontWeight: 700, fontSize: "1.15rem", color: "#1a202c", textDecoration: "none" }}>
+    <div className="min-h-screen flex flex-col bg-[#050509] text-slate-100">
+      <header className="flex items-center justify-between px-6 py-3 border-b border-slate-800 bg-black/60 backdrop-blur">
+        <Link to="/" className="font-semibold text-lg tracking-tight text-white no-underline hover:text-white">
           ALFA DELFA
         </Link>
 
         {loggedIn && (
-          <nav style={{ display: "flex", gap: "1.25rem", alignItems: "center" }}>
-            <Link to="/projects" style={{ color: "#4a5568", textDecoration: "none" }}>Projects</Link>
-            <Link to="/labs" style={{ color: "#4a5568", textDecoration: "none" }}>Labs</Link>
-            <button
-              onClick={logout}
-              style={{
-                background: "none",
-                border: "1px solid #cbd5e0",
-                borderRadius: 6,
-                padding: "0.35rem 0.85rem",
-                cursor: "pointer",
-                color: "#4a5568",
-              }}
-            >
+          <nav className="flex items-center gap-4 text-sm">
+            <Link to="/projects" className="text-slate-300 hover:text-white no-underline">
+              Projects
+            </Link>
+            <Link to="/labs" className="text-slate-300 hover:text-white no-underline">
+              Labs
+            </Link>
+            <Button variant="outline" size="sm" onClick={logout}>
               Log out
-            </button>
+            </Button>
           </nav>
         )}
       </header>
 
-      <main style={{ flex: 1, padding: "2rem 1.5rem", maxWidth: 960, margin: "0 auto", width: "100%" }}>
+      <main className="flex-1 px-6 py-6 max-w-5xl mx-auto w-full">
         <Outlet />
       </main>
     </div>

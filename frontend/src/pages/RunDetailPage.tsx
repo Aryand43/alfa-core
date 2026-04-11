@@ -3,19 +3,6 @@ import { useParams, Link } from "react-router-dom";
 import { getRun, type Run } from "../api/client";
 import StatusBadge from "../components/StatusBadge";
 
-const label: React.CSSProperties = {
-  fontWeight: 600,
-  color: "#4a5568",
-  padding: "0.45rem 0.75rem",
-  whiteSpace: "nowrap",
-  verticalAlign: "top",
-};
-const value: React.CSSProperties = {
-  padding: "0.45rem 0.75rem",
-  wordBreak: "break-all",
-};
-const mono: React.CSSProperties = { fontFamily: "monospace", fontSize: "0.9rem" };
-
 function fmtTime(iso: string | null) {
   return iso ? new Date(iso).toLocaleString() : "—";
 }
@@ -27,6 +14,15 @@ function parseMetrics(raw: string | null): Record<string, unknown> | null {
   } catch {
     return null;
   }
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <tr className="border-b border-slate-800/60">
+      <td className="px-4 py-2.5 text-xs font-medium text-slate-400 whitespace-nowrap align-top w-36">{label}</td>
+      <td className="px-4 py-2.5 text-sm text-slate-200 break-all">{children}</td>
+    </tr>
+  );
 }
 
 export default function RunDetailPage() {
@@ -43,65 +39,60 @@ export default function RunDetailPage() {
       .finally(() => setLoading(false));
   }, [runId]);
 
-  if (loading) return <p>Loading…</p>;
-  if (error) return <p style={{ color: "#e53e3e" }}>{error}</p>;
-  if (!run) return <p>Run not found.</p>;
+  if (loading) return <p className="text-sm text-slate-500">Loading…</p>;
+  if (error) return <p className="text-sm text-rose-400">{error}</p>;
+  if (!run) return <p className="text-sm text-slate-500">Run not found.</p>;
 
   const metrics = parseMetrics(run.metrics_json);
 
   return (
     <>
-      <Link to={`/projects/${run.project_id}`} style={{ fontSize: "0.85rem", color: "#3182ce" }}>
-        &larr; Back to project runs
+      <Link to={`/projects/${run.project_id}`} className="text-xs text-sky-400 hover:text-sky-300">
+        ← Back to project runs
       </Link>
-      <h1 style={{ marginTop: "0.5rem" }}>
-        Run <span style={mono}>{run.id.slice(0, 8)}</span>
+      <h1 className="text-2xl font-bold tracking-tight text-white mt-2 mb-4">
+        Run <span className="font-mono text-lg">{run.id.slice(0, 8)}</span>
       </h1>
 
-      <table style={{ borderCollapse: "collapse", marginTop: "1rem" }}>
-        <tbody>
-          <Row label="Status"><StatusBadge status={run.status} /></Row>
-          <Row label="Command"><span style={mono}>{run.command || "—"}</span></Row>
-          <Row label="Git commit"><span style={mono}>{run.git_commit || "—"}</span></Row>
-          <Row label="Working dir"><span style={mono}>{run.working_dir || "—"}</span></Row>
-          <Row label="Exit code"><span style={mono}>{run.exit_code != null ? run.exit_code : "—"}</span></Row>
-          <Row label="Started">{fmtTime(run.started_at)}</Row>
-          <Row label="Finished">{fmtTime(run.finished_at)}</Row>
-          <Row label="Created">{fmtTime(run.created_at)}</Row>
-          <Row label="Updated">{fmtTime(run.updated_at)}</Row>
-        </tbody>
-      </table>
+      {/* Detail card */}
+      <div className="rounded-xl border border-slate-800 bg-black/60 p-1 mb-6">
+        <table className="w-full">
+          <tbody>
+            <Field label="Status"><StatusBadge status={run.status} /></Field>
+            <Field label="Command"><span className="font-mono text-xs">{run.command || "—"}</span></Field>
+            <Field label="Git commit"><span className="font-mono text-xs">{run.git_commit || "—"}</span></Field>
+            <Field label="Working dir"><span className="font-mono text-xs">{run.working_dir || "—"}</span></Field>
+            <Field label="Exit code"><span className="font-mono text-xs">{run.exit_code != null ? run.exit_code : "—"}</span></Field>
+            <Field label="Started">{fmtTime(run.started_at)}</Field>
+            <Field label="Finished">{fmtTime(run.finished_at)}</Field>
+            <Field label="Created">{fmtTime(run.created_at)}</Field>
+            <Field label="Updated">{fmtTime(run.updated_at)}</Field>
+          </tbody>
+        </table>
+      </div>
 
+      {/* Metrics card */}
       {metrics && (
-        <>
-          <h2 style={{ marginTop: "1.5rem", fontSize: "1.1rem" }}>Metrics</h2>
-          <table style={{ borderCollapse: "collapse", marginTop: "0.5rem", width: "100%" }}>
+        <div className="rounded-xl border border-slate-800 bg-black/60 p-5">
+          <h2 className="text-sm font-semibold text-slate-100 mb-3">Metrics</h2>
+          <table className="w-full text-sm">
             <thead>
-              <tr style={{ textAlign: "left", borderBottom: "2px solid #e2e8f0" }}>
-                <th style={{ padding: "0.4rem 0.75rem" }}>Key</th>
-                <th style={{ padding: "0.4rem 0.75rem" }}>Value</th>
+              <tr className="text-left text-xs text-slate-400 border-b border-slate-800">
+                <th className="px-3 py-2 font-medium">Key</th>
+                <th className="px-3 py-2 font-medium">Value</th>
               </tr>
             </thead>
             <tbody>
               {Object.entries(metrics).map(([k, v]) => (
-                <tr key={k} style={{ borderBottom: "1px solid #e2e8f0" }}>
-                  <td style={{ padding: "0.4rem 0.75rem", ...mono }}>{k}</td>
-                  <td style={{ padding: "0.4rem 0.75rem", ...mono }}>{String(v)}</td>
+                <tr key={k} className="border-b border-slate-800/60">
+                  <td className="px-3 py-2 font-mono text-xs text-slate-300">{k}</td>
+                  <td className="px-3 py-2 font-mono text-xs text-slate-300">{String(v)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-        </>
+        </div>
       )}
     </>
-  );
-}
-
-function Row({ label: lbl, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <tr style={{ borderBottom: "1px solid #e2e8f0" }}>
-      <td style={label}>{lbl}</td>
-      <td style={value}>{children}</td>
-    </tr>
   );
 }

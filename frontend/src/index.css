@@ -1,27 +1,16 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@import "tailwindcss";
 
 body {
-  font-family: Inter, system-ui, -apple-system, sans-serif;
-  color: #1a202c;
-  background: #f7fafc;
+  background: #050509;
+  color: #e2e8f0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
-  color: #3182ce;
+  color: #38bdf8;
 }
-
-h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-table {
-  font-size: 0.92rem;
+a:hover {
+  color: #7dd3fc;
 }

@@ -1,13 +1,31 @@
-import { FormEvent, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { FormEvent, useEffect, useState } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Button from "../components/ui/Button";
+import { ApiRequestError } from "../api/client";
+
+function loginErrorMessage(err: unknown): string {
+  if (err instanceof ApiRequestError && err.status === 401) {
+    return "Wrong email or password. Check your credentials or create an account.";
+  }
+  if (err instanceof Error && err.message === "Failed to fetch") {
+    return "Cannot reach the server. Start the API (see README) and check your connection.";
+  }
+  return err instanceof Error ? err.message : "Sign in failed";
+}
 
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const q = searchParams.get("email");
+    if (q) setEmail(q);
+  }, [searchParams]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -15,23 +33,23 @@ export default function LoginPage() {
     try {
       await login(email, password);
       navigate("/getting-started");
-    } catch (err: any) {
-      setError(err.message ?? "Login failed");
+    } catch (err: unknown) {
+      setError(loginErrorMessage(err));
     }
   };
 
   return (
-    <div style={{ maxWidth: 380, margin: "4rem auto" }}>
-      <h1 style={{ marginBottom: "1.5rem" }}>Sign in</h1>
-      {error && <p style={{ color: "#e53e3e" }}>{error}</p>}
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+    <div className="max-w-sm mx-auto pt-16">
+      <h1 className="text-2xl font-bold text-white mb-6">Sign in</h1>
+      {error && <p className="text-sm text-rose-400 mb-3">{error}</p>}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          style={inputStyle}
+          className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
         />
         <input
           type="password"
@@ -39,31 +57,13 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          style={inputStyle}
+          className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
         />
-        <button type="submit" style={btnStyle}>Sign in</button>
+        <Button type="submit">Sign in</Button>
       </form>
-      <p style={{ marginTop: "1rem", fontSize: "0.9rem" }}>
+      <p className="mt-4 text-sm text-slate-400">
         No account? <Link to="/register">Register</Link>
       </p>
     </div>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  padding: "0.6rem 0.75rem",
-  border: "1px solid #cbd5e0",
-  borderRadius: 6,
-  fontSize: "0.95rem",
-};
-
-const btnStyle: React.CSSProperties = {
-  padding: "0.65rem",
-  background: "#3182ce",
-  color: "#fff",
-  border: "none",
-  borderRadius: 6,
-  fontWeight: 600,
-  cursor: "pointer",
-  fontSize: "0.95rem",
-};

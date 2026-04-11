@@ -1,5 +1,32 @@
 const BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 
+/** Thrown for non-OK API responses; includes HTTP status for UI branching. */
+export class ApiRequestError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+    this.name = "ApiRequestError";
+  }
+}
+
+function formatFastApiDetail(detail: unknown): string {
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    const parts = detail
+      .map((item) => {
+        if (item && typeof item === "object" && "msg" in item) {
+          return String((item as { msg: string }).msg);
+        }
+        return null;
+      })
+      .filter(Boolean) as string[];
+    return parts.length > 0 ? parts.join(". ") : "Request failed";
+  }
+  return "Request failed";
+}
+
 function authHeaders(): Record<string, string> {
   const token = localStorage.getItem("alfa_token");
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -12,7 +39,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.detail ?? res.statusText);
+    const message = formatFastApiDetail(body.detail) || res.statusText;
+    throw new ApiRequestError(message, res.status);
   }
   return res.json();
 }

@@ -1,11 +1,13 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { listProjects, createProject, type Project } from "../api/client";
+import Button from "../components/ui/Button";
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
   const load = () => {
@@ -18,73 +20,70 @@ export default function ProjectsPage() {
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    await createProject(name.trim(), desc.trim());
-    setName("");
-    setDesc("");
-    load();
+    setError("");
+    try {
+      await createProject(name.trim(), desc.trim());
+      setName("");
+      setDesc("");
+      load();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Create failed");
+    }
   };
 
   return (
     <>
-      <h1>My Projects</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-white mb-6">My Projects</h1>
 
-      <form onSubmit={handleCreate} style={{ display: "flex", gap: "0.5rem", margin: "1rem 0" }}>
-        <input
-          placeholder="Project name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          style={{ flex: 1, padding: "0.5rem 0.7rem", border: "1px solid #cbd5e0", borderRadius: 6 }}
-        />
-        <input
-          placeholder="Description (optional)"
-          value={desc}
-          onChange={(e) => setDesc(e.target.value)}
-          style={{ flex: 1, padding: "0.5rem 0.7rem", border: "1px solid #cbd5e0", borderRadius: 6 }}
-        />
-        <button
-          type="submit"
-          style={{
-            padding: "0.5rem 1rem",
-            background: "#3182ce",
-            color: "#fff",
-            border: "none",
-            borderRadius: 6,
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
-          Create
-        </button>
-      </form>
+      {/* Create form card */}
+      <div className="rounded-xl border border-slate-800 bg-black/60 p-5 mb-6">
+        <h2 className="text-sm font-medium text-slate-200 mb-3">New Project</h2>
+        {error && <p className="text-xs text-rose-400 mb-2">{error}</p>}
+        <form onSubmit={handleCreate} className="flex items-center gap-3">
+          <input
+            placeholder="Project name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+          />
+          <input
+            placeholder="Description (optional)"
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+          />
+          <Button type="submit" size="md">Create</Button>
+        </form>
+      </div>
 
+      {/* Project list */}
       {loading ? (
-        <p>Loading...</p>
+        <p className="text-sm text-slate-500">Loading…</p>
       ) : projects.length === 0 ? (
-        <p style={{ color: "#718096" }}>No projects yet. Create one above.</p>
+        <p className="text-sm text-slate-500">No projects yet. Create one above.</p>
       ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ textAlign: "left", borderBottom: "2px solid #e2e8f0" }}>
-              <th style={{ padding: "0.5rem" }}>Name</th>
-              <th style={{ padding: "0.5rem" }}>Description</th>
-              <th style={{ padding: "0.5rem" }}>Created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {projects.map((p) => (
-              <tr key={p.id} style={{ borderBottom: "1px solid #e2e8f0" }}>
-                <td style={{ padding: "0.5rem" }}>
-                  <Link to={`/projects/${p.id}`}>{p.name}</Link>
-                </td>
-                <td style={{ padding: "0.5rem", color: "#718096" }}>{p.description || "—"}</td>
-                <td style={{ padding: "0.5rem", color: "#718096", fontSize: "0.85rem" }}>
+        <div className="flex flex-col gap-3">
+          {projects.map((p) => (
+            <Link
+              key={p.id}
+              to={`/projects/${p.id}`}
+              className="rounded-lg border border-slate-800 bg-black/40 px-4 py-3 hover:border-slate-700 hover:bg-black/60 transition-colors no-underline"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-sm font-medium text-slate-100">{p.name}</span>
+                  {p.description && (
+                    <span className="ml-3 text-xs text-slate-500">{p.description}</span>
+                  )}
+                </div>
+                <span className="text-xs text-slate-600">
                   {new Date(p.created_at).toLocaleDateString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
       )}
     </>
   );

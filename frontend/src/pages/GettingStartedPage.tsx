@@ -1,109 +1,61 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { listProjects, createProject } from "../api/client";
+import Button from "../components/ui/Button";
 
-// ── Palette ──────────────────────────────────────────────────────────
-
-const bg = "#0f1117";
-const cardBg = "#161922";
-const cardBorder = "#23283a";
-const codeBg = "#1c1f2e";
-const codeBorder = "#2d3348";
-const text = "#c9d1d9";
-const textMuted = "#8b949e";
-const accent = "#58a6ff";
-const accentSubtle = "#1c3a5c";
-
-// ── Styles ───────────────────────────────────────────────────────────
-
-const page: React.CSSProperties = {
-  maxWidth: 620,
-  margin: "2.5rem auto",
-  color: text,
-};
-
-const card: React.CSSProperties = {
-  background: cardBg,
-  border: `1px solid ${cardBorder}`,
-  borderRadius: 10,
-  padding: "1.15rem 1.35rem",
-};
-
-const codeBlock: React.CSSProperties = {
-  position: "relative",
-  display: "block",
-  background: codeBg,
-  border: `1px solid ${codeBorder}`,
-  borderRadius: 6,
-  padding: "0.65rem 0.9rem",
-  paddingRight: "3.5rem",
-  fontFamily: "'SF Mono', 'Fira Code', 'Fira Mono', Menlo, Consolas, monospace",
-  fontSize: "0.85rem",
-  color: "#e6edf3",
-  whiteSpace: "pre",
-  overflowX: "auto",
-  lineHeight: 1.55,
-};
-
-const copyBtn: React.CSSProperties = {
-  position: "absolute",
-  top: 6,
-  right: 6,
-  background: accentSubtle,
-  border: `1px solid ${codeBorder}`,
-  borderRadius: 5,
-  padding: "0.25rem 0.55rem",
-  fontSize: "0.72rem",
-  fontWeight: 600,
-  color: accent,
-  cursor: "pointer",
-  lineHeight: 1.4,
-};
-
-// ── Helpers ──────────────────────────────────────────────────────────
-
-function CopyButton({ text: copyText }: { text: string }) {
+function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(copyText).then(() => {
+    navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     });
   };
 
   return (
-    <button onClick={handleCopy} style={copyBtn}>
+    <Button variant="ghost" size="sm" onClick={handleCopy} className="shrink-0">
       {copied ? "Copied!" : "Copy"}
-    </button>
+    </Button>
   );
 }
 
-function CodeSnippet({ text: snippetText }: { text: string }) {
+function StepCard({
+  step,
+  title,
+  description,
+  snippet,
+}: {
+  step: number;
+  title: string;
+  description?: string;
+  snippet: string | null;
+}) {
   return (
-    <div style={{ position: "relative", marginTop: "0.75rem" }}>
-      <code style={codeBlock}>{snippetText}</code>
-      <CopyButton text={snippetText} />
+    <div className="rounded-xl border border-slate-800 bg-black/60 p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-100">
+            <span className="text-sky-400 mr-1.5">{step}.</span>
+            {title}
+          </h3>
+          {description && (
+            <p className="mt-1 text-xs text-slate-400">{description}</p>
+          )}
+        </div>
+        {snippet && <CopyButton text={snippet} />}
+      </div>
+      {snippet && (
+        <pre className="mt-3 bg-[#050612] border border-slate-800 rounded-md px-3 py-2 text-xs font-mono text-slate-100 overflow-x-auto">
+          {snippet}
+        </pre>
+      )}
     </div>
   );
 }
-
-function StepCard({ step, title, children }: { step: number; title: string; children: React.ReactNode }) {
-  return (
-    <div style={card}>
-      <h3 style={{ margin: 0, fontSize: "1rem", color: text }}>
-        <span style={{ color: accent, marginRight: "0.5rem", fontWeight: 700 }}>{step}.</span>
-        {title}
-      </h3>
-      <div style={{ marginTop: "0.25rem" }}>{children}</div>
-    </div>
-  );
-}
-
-// ── Page ─────────────────────────────────────────────────────────────
 
 const STEP2_SNIPPET =
-  `export ALFA_TOKEN=...           # paste your token\nexport ALFA_API_BASE_URL=http://localhost:8000`;
+  "export ALFA_TOKEN=...           # paste your token\nexport ALFA_API_BASE_URL=http://localhost:8000";
 
 export default function GettingStartedPage() {
   const [projectId, setProjectId] = useState<string | null>(null);
@@ -137,46 +89,53 @@ export default function GettingStartedPage() {
 
   const step3Snippet = projectId
     ? `alfa run --project ${projectId} -- python train.py`
-    : "alfa run --project <project-id> -- python train.py";
+    : null;
 
   return (
-    <div style={{ background: bg, minHeight: "100vh", padding: "2rem 1rem" }}>
-      <div style={page}>
-        <h1 style={{ marginBottom: "0.25rem", fontSize: "1.55rem", fontWeight: 700, color: "#e6edf3" }}>
-          Getting Started
-        </h1>
-        <p style={{ color: textMuted, marginBottom: "2rem", fontSize: "0.95rem" }}>
-          Run your first experiment in three steps.
-        </p>
+    <div className="max-w-xl mx-auto py-8">
+      <h1 className="text-2xl font-bold tracking-tight text-white">Getting Started</h1>
+      <p className="mt-1 text-sm text-slate-400 mb-8">
+        Run your first experiment in three steps.
+      </p>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <StepCard step={1} title="Install the CLI">
-            <CodeSnippet text="pip install alfa-cli" />
-          </StepCard>
+      <div className="flex flex-col gap-4">
+        <StepCard
+          step={1}
+          title="Install the CLI"
+          description="Install the alfa command-line tool."
+          snippet="pip install alfa-cli"
+        />
 
-          <StepCard step={2} title="Set your token">
-            <CodeSnippet text={STEP2_SNIPPET} />
-          </StepCard>
+        <StepCard
+          step={2}
+          title="Set your token"
+          description="Configure your environment to authenticate with the server."
+          snippet={STEP2_SNIPPET}
+        />
 
-          <StepCard step={3} title="Run your first experiment">
-            {loading ? (
-              <p style={{ color: textMuted, margin: "0.75rem 0 0", fontSize: "0.88rem" }}>
-                Resolving project…
-              </p>
-            ) : error ? (
-              <p style={{ color: "#f85149", margin: "0.75rem 0 0", fontSize: "0.88rem" }}>{error}</p>
-            ) : (
-              <CodeSnippet text={step3Snippet} />
-            )}
-          </StepCard>
-        </div>
-
-        <p style={{ marginTop: "2rem", fontSize: "0.9rem" }}>
-          <Link to="/projects" style={{ color: accent, textDecoration: "none" }}>
-            Go to projects →
-          </Link>
-        </p>
+        <StepCard
+          step={3}
+          title="Run your first experiment"
+          description="Execute a training script and track it as a run."
+          snippet={
+            loading
+              ? null
+              : error
+                ? null
+                : step3Snippet
+          }
+        />
+        {loading && (
+          <p className="text-xs text-slate-500 -mt-2 ml-1">Resolving project…</p>
+        )}
+        {error && (
+          <p className="text-xs text-rose-400 -mt-2 ml-1">{error}</p>
+        )}
       </div>
+
+      <p className="mt-8 text-sm">
+        <Link to="/projects">Go to projects →</Link>
+      </p>
     </div>
   );
 }

@@ -1,23 +1,15 @@
-const STATUS_COLORS: Record<string, string> = {
-  pending: "#ecc94b",
-  running: "#3182ce",
-  success: "#38a169",
-  failure: "#e53e3e",
+const COLORS: Record<string, string> = {
+  pending: "bg-amber-500/80 text-black",
+  running: "bg-sky-500/80 text-black",
+  success: "bg-emerald-500/80 text-black",
+  failure: "bg-rose-500/80 text-black",
 };
 
 export default function StatusBadge({ status }: { status: string }) {
+  const color = COLORS[status] ?? "bg-slate-600 text-slate-100";
+
   return (
-    <span
-      style={{
-        display: "inline-block",
-        padding: "0.15rem 0.55rem",
-        borderRadius: 999,
-        fontSize: "0.8rem",
-        fontWeight: 600,
-        color: "#fff",
-        background: STATUS_COLORS[status] ?? "#a0aec0",
-      }}
-    >
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${color}`}>
       {status}
     </span>
   );
